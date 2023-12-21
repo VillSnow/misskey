@@ -117,7 +117,7 @@ export class RoleService implements OnApplicationShutdown, OnModuleInit {
 
 		private metaService: MetaService,
 		private cacheService: CacheService,
-		private userEntityService: UserEntityService,
+		// private userEntityService: UserEntityService, // 循環参照疑惑
 		private globalEventService: GlobalEventService,
 		private idService: IdService,
 		private moderationLogService: ModerationLogService,
@@ -211,10 +211,12 @@ export class RoleService implements OnApplicationShutdown, OnModuleInit {
 					return !this.evalCond(user, value.value);
 				}
 				case 'isLocal': {
-					return this.userEntityService.isLocalUser(user);
+					throw new Error('not implemented');
+					// return this.userEntityService.isLocalUser(user);
 				}
 				case 'isRemote': {
-					return this.userEntityService.isRemoteUser(user);
+					throw new Error('not implemented');
+					// return this.userEntityService.isRemoteUser(user);
 				}
 				case 'createdLessThan': {
 					return this.idService.parse(user.id).date.getTime() > (Date.now() - (value.sec * 1000));

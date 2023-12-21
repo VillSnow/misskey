@@ -1,3 +1,4 @@
+console.log('import UserListService');
 /*
  * SPDX-FileCopyrightText: syuilo and other misskey contributors
  * SPDX-License-Identifier: AGPL-3.0-only
@@ -38,7 +39,7 @@ export class UserListService implements OnApplicationShutdown {
 
 		private userEntityService: UserEntityService,
 		private idService: IdService,
-		private roleService: RoleService,
+		// private roleService: RoleService, // 循環参照疑惑
 		private globalEventService: GlobalEventService,
 		private proxyAccountService: ProxyAccountService,
 		private queueService: QueueService,
@@ -88,27 +89,28 @@ export class UserListService implements OnApplicationShutdown {
 		const currentCount = await this.userListMembershipsRepository.countBy({
 			userListId: list.id,
 		});
-		if (currentCount > (await this.roleService.getUserPolicies(me.id)).userEachUserListsLimit) {
-			throw new UserListService.TooManyUsersError();
-		}
+		throw new Error('not implemented');
+		// if (currentCount > (await this.roleService.getUserPolicies(me.id)).userEachUserListsLimit) {
+		// 	throw new UserListService.TooManyUsersError();
+		// }
 
-		await this.userListMembershipsRepository.insert({
-			id: this.idService.gen(),
-			userId: target.id,
-			userListId: list.id,
-			userListUserId: list.userId,
-		} as MiUserListMembership);
+		// await this.userListMembershipsRepository.insert({
+		// 	id: this.idService.gen(),
+		// 	userId: target.id,
+		// 	userListId: list.id,
+		// 	userListUserId: list.userId,
+		// } as MiUserListMembership);
 
-		this.globalEventService.publishInternalEvent('userListMemberAdded', { userListId: list.id, memberId: target.id });
-		this.globalEventService.publishUserListStream(list.id, 'userAdded', await this.userEntityService.pack(target));
+		// this.globalEventService.publishInternalEvent('userListMemberAdded', { userListId: list.id, memberId: target.id });
+		// this.globalEventService.publishUserListStream(list.id, 'userAdded', await this.userEntityService.pack(target));
 
-		// このインスタンス内にこのリモートユーザーをフォローしているユーザーがいなくても投稿を受け取るためにダミーのユーザーがフォローしたということにする
-		if (this.userEntityService.isRemoteUser(target)) {
-			const proxy = await this.proxyAccountService.fetch();
-			if (proxy) {
-				this.queueService.createFollowJob([{ from: { id: proxy.id }, to: { id: target.id } }]);
-			}
-		}
+		// // このインスタンス内にこのリモートユーザーをフォローしているユーザーがいなくても投稿を受け取るためにダミーのユーザーがフォローしたということにする
+		// if (this.userEntityService.isRemoteUser(target)) {
+		// 	const proxy = await this.proxyAccountService.fetch();
+		// 	if (proxy) {
+		// 		this.queueService.createFollowJob([{ from: { id: proxy.id }, to: { id: target.id } }]);
+		// 	}
+		// }
 	}
 
 	@bindThis
